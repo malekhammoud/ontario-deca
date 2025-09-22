@@ -2,13 +2,13 @@ import React from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   ViewStyle,
   StatusBar
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/colors';
 
 interface ScreenProps {
@@ -48,55 +48,47 @@ export const Screen: React.FC<ScreenProps> = ({
     content
   );
 
+  const keyboardAvoidingContent = keyboardAvoiding ? (
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      {wrappedContent}
+    </KeyboardAvoidingView>
+  ) : (
+    wrappedContent
+  );
+
   return (
-    <>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor }]}
+      edges={[
+        ...(safeAreaTop ? ['top'] : []),
+        ...(safeAreaBottom ? ['bottom'] : [])
+      ]}
+    >
       <StatusBar
-        barStyle={backgroundColor === COLORS.primary ? 'light-content' : 'dark-content'}
+        barStyle="dark-content"
         backgroundColor={backgroundColor}
+        translucent={false}
       />
-      <SafeAreaView
-        style={[
-          styles.safeArea,
-          { backgroundColor },
-          !safeAreaTop && styles.noSafeAreaTop,
-          !safeAreaBottom && styles.noSafeAreaBottom
-        ]}
-      >
-        {keyboardAvoiding ? (
-          <KeyboardAvoidingView
-            style={styles.keyboardAvoidingView}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-          >
-            {wrappedContent}
-          </KeyboardAvoidingView>
-        ) : (
-          wrappedContent
-        )}
-      </SafeAreaView>
-    </>
+      {keyboardAvoidingContent}
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  noSafeAreaTop: {
-    paddingTop: 0,
-  },
-  noSafeAreaBottom: {
-    paddingBottom: 0,
+  flex: {
+    flex: 1,
   },
   container: {
     flex: 1,
-    padding: 16,
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
   },
 });

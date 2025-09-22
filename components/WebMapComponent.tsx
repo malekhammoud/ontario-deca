@@ -4,6 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
   Linking
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,14 +29,28 @@ interface WebMapComponentProps {
 export const WebMapComponent: React.FC<WebMapComponentProps> = ({ locations }) => {
   const insets = useSafeAreaInsets();
 
-  const openInMaps = (location: any) => {
+  const openInMaps = async (location: any) => {
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.coordinate.latitude},${location.coordinate.longitude}`;
-    window.open(googleMapsUrl, '_blank');
+
+    if (Platform.OS === 'web') {
+      // For web, use Linking API which handles window.open safely
+      await Linking.openURL(googleMapsUrl);
+    } else {
+      // For native platforms, use Linking API
+      await Linking.openURL(googleMapsUrl);
+    }
   };
 
-  const openDirections = (location: any) => {
+  const openDirections = async (location: any) => {
     const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.coordinate.latitude},${location.coordinate.longitude}`;
-    window.open(directionsUrl, '_blank');
+
+    if (Platform.OS === 'web') {
+      // For web, use Linking API which handles window.open safely
+      await Linking.openURL(directionsUrl);
+    } else {
+      // For native platforms, use Linking API
+      await Linking.openURL(directionsUrl);
+    }
   };
 
   return (

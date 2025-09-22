@@ -7,7 +7,8 @@ import {
   RefreshControl,
   Alert,
   Platform,
-  Linking
+  Linking,
+  ScrollView
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +23,8 @@ let FileSystem = null;
 let NetInfo = null;
 if (Platform.OS !== 'web') {
   try {
-    FileSystem = require('expo-file-system');
+    // Use the legacy filesystem API to avoid deprecation warnings
+    FileSystem = require('expo-file-system/legacy');
     NetInfo = require('@react-native-community/netinfo');
   } catch (error) {
     console.log('Native modules not available');

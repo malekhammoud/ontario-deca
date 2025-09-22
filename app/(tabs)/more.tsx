@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
-  Share
+  Share,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';

@@ -1,13 +1,10 @@
 import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import {
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
   StyleSheet,
-  Alert,
-  ActivityIndicator
+  Alert
 } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
@@ -194,7 +191,7 @@ export default function SignInScreen() {
           </TouchableOpacity>
 
           <View style={styles.linkContainer}>
-            <StyledText style={styles.linkText}>Don't have an account? </StyledText>
+            <StyledText style={styles.linkText}>Don&apos;t have an account? </StyledText>
             <Link href="/(auth)/sign-up" style={styles.link}>
               <StyledText style={styles.linkHighlight}>Sign Up</StyledText>
             </Link>
