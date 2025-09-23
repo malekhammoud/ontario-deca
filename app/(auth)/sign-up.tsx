@@ -11,7 +11,7 @@ import {
   Platform,
   ActivityIndicator
 } from 'react-native'
-import { useSignUp } from '@clerk/clerk-expo'
+import { useSignUp, useUser } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { StyledText } from '@/components/ui/StyledText'
@@ -22,6 +22,7 @@ import { COLORS, SPACING } from '@/constants/colors'
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
+  const { user } = useUser()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = React.useState('')
@@ -31,6 +32,14 @@ export default function SignUpScreen() {
   const [loading, setLoading] = React.useState(false)
   const [verificationLoading, setVerificationLoading] = React.useState(false)
   const [errors, setErrors] = React.useState<{[key: string]: string}>({})
+  const [step, setStep] = React.useState(1) // 1: Email/Password, 2: User Info, 3: Verification
+  const [firstName, setFirstName] = React.useState('')
+  const [lastName, setLastName] = React.useState('')
+  const [school, setSchool] = React.useState('')
+  const [linkedin, setLinkedin] = React.useState('')
+  const [emailOrPhone, setEmailOrPhone] = React.useState('')
+  const [website, setWebsite] = React.useState('')
+  const [selectedEvents, setSelectedEvents] = React.useState<string[]>([])
 
   // Clear errors when user types
   const clearError = (field: string) => {
@@ -86,7 +95,7 @@ export default function SignUpScreen() {
     return newErrors
   }
 
-  // Handle submission of sign-up form
+  // Handle submission of sign-up form (step 1 - email/password)
   const onSignUpPress = async () => {
     if (!isLoaded) return
 
@@ -110,31 +119,81 @@ export default function SignUpScreen() {
       return
     }
 
+    setErrors({})
+    // Move to step 2 (user info collection)
+    setStep(2)
+  }
+
+  // Handle user info submission (step 2)
+  const onUserInfoSubmit = async () => {
+    // Basic validation
+    const newErrors: {[key: string]: string} = {}
+
+    if (!firstName.trim()) {
+      newErrors.firstName = 'First name is required'
+    }
+
+    if (!lastName.trim()) {
+      newErrors.lastName = 'Last name is required'
+    }
+
+    if (!school.trim()) {
+      newErrors.school = 'School name is required'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
     setLoading(true)
     setErrors({})
 
     try {
+      // Create the account with all the collected information
       await signUp.create({
         emailAddress,
         password,
+        firstName,
+        lastName,
+        unsafeMetadata: {
+          firstName,
+          lastName,
+          school,
+          networking: {
+            linkedin,
+            emailOrPhone,
+            website
+          },
+          eventSelections: selectedEvents
+        }
       })
 
-      // Send user an email with verification code
+      // Prepare for email verification
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
 
-      // Set 'pendingVerification' to true to display second form
+      // Move to verification step
       setPendingVerification(true)
+      setStep(3)
     } catch (err: any) {
       console.error('Sign up error:', JSON.stringify(err, null, 2))
       const parsedErrors = parseClerkError(err)
       setErrors(parsedErrors)
 
-      // Show general errors in an alert if they exist
       if (parsedErrors.general) {
         Alert.alert('Sign Up Error', parsedErrors.general)
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Toggle event selection
+  const toggleEvent = (eventId: string) => {
+    if (selectedEvents.includes(eventId)) {
+      setSelectedEvents([])
+    } else {
+      setSelectedEvents([eventId])
     }
   }
 
@@ -156,7 +215,10 @@ export default function SignUpScreen() {
       })
 
       if (signUpAttempt.status === 'complete') {
+        // Set the active session
         await setActive({ session: signUpAttempt.createdSessionId })
+
+        // Navigate directly to the main app since profile is already complete
         router.replace('/(tabs)')
       } else {
         console.error('Verification incomplete:', JSON.stringify(signUpAttempt, null, 2))
@@ -218,7 +280,7 @@ export default function SignUpScreen() {
             />
 
             <Button
-              label={verificationLoading ? "Verifying..." : "Verify Email"}
+              label={verificationLoading ? "Verifying..." : "Complete Registration"}
               onPress={onVerifyPress}
               disabled={verificationLoading || !code.trim()}
               loading={verificationLoading}
@@ -236,6 +298,158 @@ export default function SignUpScreen() {
     )
   }
 
+  // Step 2: User Info Collection
+  if (step === 2) {
+    return (
+      <Screen keyboardAvoiding>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <StyledText type="heading1" style={styles.title}>
+              Complete Your Profile
+            </StyledText>
+            <StyledText style={styles.subtitle}>
+              Tell us a bit about yourself to get the most out of the event
+            </StyledText>
+          </View>
+
+          <View style={styles.form}>
+            <Input
+              label="First Name"
+              value={firstName}
+              onChangeText={(text) => {
+                setFirstName(text)
+                clearError('firstName')
+              }}
+              placeholder="Enter your first name"
+              error={errors.firstName}
+              autoFocus
+              leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <Input
+              label="Last Name"
+              value={lastName}
+              onChangeText={(text) => {
+                setLastName(text)
+                clearError('lastName')
+              }}
+              placeholder="Enter your last name"
+              error={errors.lastName}
+              leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <Input
+              label="School"
+              value={school}
+              onChangeText={(text) => {
+                setSchool(text)
+                clearError('school')
+              }}
+              placeholder="Enter your school name"
+              error={errors.school}
+              leftIcon={<Ionicons name="school-outline" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <StyledText style={styles.sectionTitle}>
+              Networking Information (Optional)
+            </StyledText>
+
+            <Input
+              label="LinkedIn Profile"
+              value={linkedin}
+              onChangeText={setLinkedin}
+              placeholder="Enter your LinkedIn URL"
+              autoCapitalize="none"
+              leftIcon={<Ionicons name="logo-linkedin" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <Input
+              label="Contact Email/Phone"
+              value={emailOrPhone}
+              onChangeText={setEmailOrPhone}
+              placeholder="Alternative contact method"
+              autoCapitalize="none"
+              leftIcon={<Ionicons name="call-outline" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <Input
+              label="Website/Portfolio"
+              value={website}
+              onChangeText={setWebsite}
+              placeholder="Enter your website URL"
+              autoCapitalize="none"
+              leftIcon={<Ionicons name="globe-outline" size={20} color={COLORS.text_secondary} />}
+            />
+
+            <StyledText style={styles.sectionTitle}>
+              Event Networking Preferences
+            </StyledText>
+            <StyledText style={styles.eventSelectionSubtitle}>
+              Select up to 1 event for networking opportunities
+            </StyledText>
+
+            <View style={styles.eventSelectionContainer}>
+              {['Case Study Competition', 'Business Plan Presentation', 'Marketing Competition', 'Finance Competition', 'Entrepreneurship'].map((eventName, index) => {
+                const eventId = `event${index + 1}`;
+                return (
+                  <TouchableOpacity
+                    key={eventId}
+                    onPress={() => toggleEvent(eventId)}
+                    style={[
+                      styles.eventButton,
+                      selectedEvents.includes(eventId) && styles.eventButtonSelected
+                    ]}
+                  >
+                    <StyledText
+                      style={[
+                        styles.eventButtonText,
+                        selectedEvents.includes(eventId) && styles.eventButtonTextSelected
+                      ]}
+                    >
+                      {eventName}
+                    </StyledText>
+                    {selectedEvents.includes(eventId) && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={16}
+                        color={COLORS.white}
+                        style={styles.eventCheckIcon}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <StyledText style={styles.eventSelectionHelper}>
+              {selectedEvents.length}/1 event selected
+            </StyledText>
+
+            {errors.general && (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={20} color={COLORS.error} />
+                <StyledText style={styles.errorText}>{errors.general}</StyledText>
+              </View>
+            )}
+
+            <Button
+              label={loading ? "Creating Account..." : "Create Account & Send Verification"}
+              onPress={onUserInfoSubmit}
+              disabled={loading || !firstName.trim() || !lastName.trim() || !school.trim()}
+              loading={loading}
+              style={styles.submitButton}
+            />
+
+            <TouchableOpacity onPress={() => setStep(1)} style={styles.backButton}>
+              <StyledText style={styles.backButtonText}>← Back to Email & Password</StyledText>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Screen>
+    )
+  }
+
+  // Step 1: Email/Password - Render sign-up form
   return (
     <Screen keyboardAvoiding>
       <View style={styles.container}>
@@ -288,10 +502,9 @@ export default function SignUpScreen() {
           )}
 
           <Button
-            label={loading ? "Creating Account..." : "Create Account"}
+            label="Next: Complete Profile"
             onPress={onSignUpPress}
-            disabled={loading || !emailAddress.trim() || !password.trim()}
-            loading={loading}
+            disabled={!emailAddress.trim() || !password.trim()}
             style={styles.submitButton}
           />
 
@@ -368,5 +581,67 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     marginLeft: SPACING.sm,
     flex: 1,
+  },
+  eventSelectionTitle: {
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+    color: COLORS.primary,
+  },
+  eventSelectionSubtitle: {
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+    color: COLORS.text_secondary,
+  },
+  eventSelectionContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: SPACING.lg,
+  },
+  eventButton: {
+    backgroundColor: COLORS.secondary,
+    borderRadius: 8,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    margin: SPACING.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  eventButtonSelected: {
+    backgroundColor: COLORS.primary,
+  },
+  eventButtonText: {
+    color: COLORS.white,
+    fontWeight: '500',
+    flex: 1,
+  },
+  eventButtonTextSelected: {
+    fontWeight: '700',
+  },
+  eventCheckIcon: {
+    marginLeft: SPACING.sm,
+  },
+  sectionTitle: {
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.sm,
+    textAlign: 'left',
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontSize: 18,
+  },
+  backButton: {
+    marginTop: SPACING.md,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: COLORS.text_secondary,
+    textDecorationLine: 'underline',
+  },
+  eventSelectionHelper: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: COLORS.text_secondary,
+    marginBottom: SPACING.md,
   },
 })
