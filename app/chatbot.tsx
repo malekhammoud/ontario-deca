@@ -12,27 +12,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { Header } from '@/components/ui/Header';
 import { StyledText } from '@/components/ui/StyledText';
 import { COLORS, SPACING } from '@/constants/colors';
-
-// Mock chatbot responses for demo purposes
-const MOCK_RESPONSES = {
-  'default': "I'm your DECA Provincials Assistant. How can I help you today?",
-  'greeting': ["Hello! How can I help with DECA Provincials today?", "Hi there! What information do you need about the event?"],
-  'schedule': "The DECA Provincials event runs from September 22-25, 2025. You can find the full schedule in the Schedule tab.",
-  'location': "The event is being held at the Toronto Convention Center. You can find detailed maps and directions in the Venue tab.",
-  'competition': "There are several competition categories including Business Management, Marketing, Finance, and Hospitality. Each has different case studies and requirements.",
-  'dress': "Business professional attire is required for all competitions. This includes a suit or blazer with dress pants/skirt and dress shoes.",
-  'awards': "The Awards Ceremony will be held on September 25th at 4:00 PM in the Main Auditorium.",
-  'registration': "Registration is open daily from 8:00 AM to 10:00 AM at the Main Entrance on Day 1 (September 22).",
-  'contact': "You can contact the event organizers through the Contact section in the More tab, or email directly at info@decaontario.ca",
-  'wifi': "Free Wi-Fi is available throughout the venue. Network: DECA_Event, Password: Provincial2025",
-  'food': "There are food courts and cafés throughout the venue. Some meal options are included with registration, check your registration package for details.",
-  'transportation': "Shuttle services are available from partner hotels. Public transportation is also convenient, with subway and bus stops nearby.",
-  'hotel': "Our partner hotels include The Grand Hotel, City Center Inn, and Business Plaza Hotel. Special rates are available for DECA members."
-};
 
 // Chat message types
 interface Message {
@@ -41,6 +25,9 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: Date;
 }
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
 
 export default function ChatbotScreen() {
   const [messages, setMessages] = useState<Message[]>([
@@ -65,7 +52,7 @@ export default function ChatbotScreen() {
     }
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (inputText.trim() === '') return;
 
     // Add user message
@@ -77,56 +64,69 @@ export default function ChatbotScreen() {
     };
 
     setMessages(prevMessages => [...prevMessages, userMessage]);
+    const currentInput = inputText.trim();
     setInputText('');
     setIsTyping(true);
 
-    // Simulate AI thinking
-    setTimeout(() => {
-      const botResponse = generateResponse(inputText.trim().toLowerCase());
+    try {
+      // Generate response using Gemini AI
+      const response = await generateGeminiResponse(currentInput);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponse,
+        text: response,
         sender: 'bot',
         timestamp: new Date(),
       };
 
       setMessages(prevMessages => [...prevMessages, botMessage]);
+    } catch (error) {
+      console.error('Error generating response:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "DECA AI BOT not available",
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
 
     Keyboard.dismiss();
   };
 
-  // Mock response generation for demo purposes
-  // In a real app, this would be an API call to a backend service
-  const generateResponse = (query: string): string => {
-    // Check for keywords
-    if (query.includes('hello') || query.includes('hi') || query.includes('hey')) {
-      return MOCK_RESPONSES.greeting[Math.floor(Math.random() * MOCK_RESPONSES.greeting.length)];
-    } else if (query.includes('schedule') || query.includes('timetable') || query.includes('when')) {
-      return MOCK_RESPONSES.schedule;
-    } else if (query.includes('where') || query.includes('location') || query.includes('venue')) {
-      return MOCK_RESPONSES.location;
-    } else if (query.includes('competition') || query.includes('compete') || query.includes('events')) {
-      return MOCK_RESPONSES.competition;
-    } else if (query.includes('dress') || query.includes('attire') || query.includes('wear')) {
-      return MOCK_RESPONSES.dress;
-    } else if (query.includes('award') || query.includes('ceremony') || query.includes('prize')) {
-      return MOCK_RESPONSES.awards;
-    } else if (query.includes('register') || query.includes('registration') || query.includes('check-in')) {
-      return MOCK_RESPONSES.registration;
-    } else if (query.includes('contact') || query.includes('organizer') || query.includes('email')) {
-      return MOCK_RESPONSES.contact;
-    } else if (query.includes('wifi') || query.includes('internet') || query.includes('connection')) {
-      return MOCK_RESPONSES.wifi;
-    } else if (query.includes('food') || query.includes('eat') || query.includes('restaurant')) {
-      return MOCK_RESPONSES.food;
-    } else if (query.includes('transport') || query.includes('travel') || query.includes('shuttle')) {
-      return MOCK_RESPONSES.transportation;
-    } else if (query.includes('hotel') || query.includes('stay') || query.includes('accommodation')) {
-      return MOCK_RESPONSES.hotel;
-    } else {
-      return "I'm not sure about that. Please check the app for more information or contact the organizers for specific details about your question.";
+  // Generate response using Gemini AI
+  const generateGeminiResponse = async (query: string): Promise<string> => {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+      const prompt = `You are an AI assistant for the DECA Provincials event in Ontario. The event runs from September 22-25, 2025, and is held at the Toronto Convention Center. You should provide helpful, accurate information about:
+
+- Event schedule and timing
+- Competition categories (Business Management, Marketing, Finance, Hospitality)
+- Venue information and maps
+- Registration details
+- Dress code (business professional attire required)
+- Awards ceremony (September 25th at 4:00 PM)
+- Contact information (info@decaontario.ca)
+- Wi-Fi access (Network: DECA_Event, Password: Provincial2025)
+- Food and dining options
+- Transportation and shuttle services
+- Partner hotel accommodations
+- General event information
+
+Please keep responses concise, helpful, and professional. If you don't know specific information, suggest they check the app or contact organizers.
+
+User question: ${query}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      return text || "I'm sorry, I couldn't generate a response. Please try again.";
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      throw error;
     }
   };
 
@@ -241,7 +241,8 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.md,
   },
   messagesContent: {
     flexGrow: 1,
@@ -250,14 +251,16 @@ const styles = StyleSheet.create({
   messageBubble: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
-    maxWidth: '85%',
+    maxWidth: '90%',
+    width: 'auto',
   },
   userBubble: {
     alignSelf: 'flex-end',
-    marginLeft: 'auto',
+    marginLeft: '10%',
   },
   botBubble: {
     alignSelf: 'flex-start',
+    marginRight: '10%',
   },
   botAvatarContainer: {
     alignSelf: 'flex-end',
@@ -275,6 +278,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
+    flex: 1,
+    minWidth: 0, // Allow text to wrap properly
   },
   userContent: {
     backgroundColor: COLORS.primary,
@@ -286,6 +291,9 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
+    flexWrap: 'wrap',
+    flexShrink: 1,
   },
   userText: {
     color: '#FFFFFF',
@@ -333,6 +341,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     maxHeight: 120,
     color: COLORS.text,
+    textAlignVertical: 'center',
   },
   sendButton: {
     width: 40,

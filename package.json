@@ -14,6 +14,7 @@
     "@clerk/clerk-expo": "^2.15.2",
     "@clerk/clerk-sdk-node": "^4.13.23",
     "@expo/vector-icons": "^15.0.2",
+    "@google/generative-ai": "^0.24.1",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
