@@ -5,30 +5,40 @@ import {
   ScrollView,
   TouchableOpacity,
   SectionList,
-  RefreshControl
+  RefreshControl,
+  Text,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeInDown,
+  FadeInRight,
+  SlideInLeft,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SwipeableScreen } from '@/components/SwipeableScreen';
+import { AnimatedHeader } from '@/components/AnimatedHeader';
 import { StyledText } from '@/components/ui/StyledText';
 import { Card } from '@/components/ui/Card';
-import { Header } from '@/components/ui/Header';
-import { COLORS, SPACING, FONT_SIZES } from '@/constants/colors';
+import { COLORS, SPACING, FONT_SIZES, SHADOWS, BORDER_RADIUS, LAYOUT } from '@/constants/colors';
 
-// Schedule categories
+const { width } = Dimensions.get('window');
+
+// Professional schedule categories
 const SCHEDULE_CATEGORIES = [
-  { id: 'all', name: 'All Events' },
-  { id: 'business', name: 'Business Management' },
-  { id: 'marketing', name: 'Marketing' },
-  { id: 'finance', name: 'Finance' },
-  { id: 'hospitality', name: 'Hospitality' },
+  { id: 'all', name: 'All Events', icon: 'calendar', color: COLORS.primary },
+  { id: 'business', name: 'Business', icon: 'briefcase', color: COLORS.secondary },
+  { id: 'marketing', name: 'Marketing', icon: 'megaphone', color: COLORS.accent },
+  { id: 'finance', name: 'Finance', icon: 'card', color: COLORS.info },
+  { id: 'hospitality', name: 'Hospitality', icon: 'restaurant', color: COLORS.warning },
 ];
 
-// Sample schedule data structured for SectionList
+// Professional schedule data
 const SCHEDULE_DATA = [
   {
-    title: 'Day 1 - September 22, 2025',
+    title: 'Day 1 - September 23, 2025',
     data: [
       {
         id: '1',
@@ -36,6 +46,9 @@ const SCHEDULE_DATA = [
         time: '8:00 AM - 10:00 AM',
         location: 'Main Entrance',
         category: 'all',
+        icon: 'clipboard',
+        status: 'ongoing',
+        description: 'Welcome to DECA Ontario Conference',
       },
       {
         id: '2',
@@ -43,126 +56,64 @@ const SCHEDULE_DATA = [
         time: '10:30 AM - 12:00 PM',
         location: 'Grand Ballroom',
         category: 'all',
+        icon: 'mic',
+        status: 'upcoming',
+        description: 'Keynote speakers and conference overview',
       },
       {
         id: '3',
-        title: 'Lunch Break',
-        time: '12:00 PM - 1:30 PM',
-        location: 'Food Court',
-        category: 'all',
+        title: 'Business Management Workshop',
+        time: '1:30 PM - 3:00 PM',
+        location: 'Conference Room A',
+        category: 'business',
+        icon: 'briefcase',
+        status: 'upcoming',
+        description: 'Strategic planning and leadership skills',
       },
       {
         id: '4',
-        title: 'Business Management Workshop',
-        time: '2:00 PM - 3:30 PM',
-        location: 'Conference Room A',
-        category: 'business',
-      },
-      {
-        id: '5',
-        title: 'Marketing Case Studies Distribution',
-        time: '3:45 PM - 4:30 PM',
+        title: 'Marketing Case Study',
+        time: '3:30 PM - 5:00 PM',
         location: 'Conference Room B',
         category: 'marketing',
+        icon: 'megaphone',
+        status: 'upcoming',
+        description: 'Real-world marketing challenges',
       },
     ],
   },
   {
-    title: 'Day 2 - September 23, 2025',
+    title: 'Day 2 - September 24, 2025',
     data: [
       {
-        id: '6',
-        title: 'Finance Competition Briefing',
-        time: '9:00 AM - 10:00 AM',
-        location: 'Auditorium',
+        id: '5',
+        title: 'Finance Competition',
+        time: '9:00 AM - 11:00 AM',
+        location: 'Main Hall',
         category: 'finance',
+        icon: 'card',
+        status: 'upcoming',
+        description: 'Investment and financial analysis',
+      },
+      {
+        id: '6',
+        title: 'Hospitality Service Challenge',
+        time: '11:30 AM - 1:00 PM',
+        location: 'Practice Restaurant',
+        category: 'hospitality',
+        icon: 'restaurant',
+        status: 'upcoming',
+        description: 'Customer service excellence',
       },
       {
         id: '7',
-        title: 'Hospitality Case Presentations',
-        time: '10:30 AM - 12:30 PM',
-        location: 'Meeting Rooms 1-5',
-        category: 'hospitality',
-      },
-      {
-        id: '8',
-        title: 'Lunch Break',
-        time: '12:30 PM - 2:00 PM',
-        location: 'Food Court',
-        category: 'all',
-      },
-      {
-        id: '9',
-        title: 'Networking Session',
-        time: '2:30 PM - 4:00 PM',
-        location: 'Exhibition Hall',
-        category: 'all',
-      },
-    ],
-  },
-  {
-    title: 'Day 3 - September 24, 2025',
-    data: [
-      {
-        id: '10',
-        title: 'Marketing Presentations',
-        time: '9:00 AM - 12:00 PM',
-        location: 'Conference Rooms C-F',
-        category: 'marketing',
-      },
-      {
-        id: '11',
-        title: 'Lunch Break',
-        time: '12:00 PM - 1:30 PM',
-        location: 'Food Court',
-        category: 'all',
-      },
-      {
-        id: '12',
-        title: 'Business Management Finals',
-        time: '2:00 PM - 4:00 PM',
-        location: 'Main Auditorium',
-        category: 'business',
-      },
-    ],
-  },
-  {
-    title: 'Day 4 - September 25, 2025',
-    data: [
-      {
-        id: '13',
-        title: 'Finance Finals',
-        time: '9:00 AM - 11:00 AM',
-        location: 'Grand Ballroom',
-        category: 'finance',
-      },
-      {
-        id: '14',
-        title: 'Hospitality Finals',
-        time: '11:30 AM - 1:30 PM',
-        location: 'Grand Ballroom',
-        category: 'hospitality',
-      },
-      {
-        id: '15',
-        title: 'Lunch Break',
-        time: '1:30 PM - 3:00 PM',
-        location: 'Food Court',
-        category: 'all',
-      },
-      {
-        id: '16',
         title: 'Awards Ceremony',
-        time: '4:00 PM - 6:00 PM',
-        location: 'Main Auditorium',
+        time: '7:00 PM - 9:00 PM',
+        location: 'Grand Ballroom',
         category: 'all',
-      },
-      {
-        id: '17',
-        title: 'Closing Reception',
-        time: '6:30 PM - 8:30 PM',
-        location: 'Exhibition Hall',
-        category: 'all',
+        icon: 'trophy',
+        status: 'upcoming',
+        description: 'Celebrating achievements and winners',
       },
     ],
   },
@@ -174,221 +125,305 @@ export default function ScheduleScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  const filteredData = SCHEDULE_DATA.map(section => ({
-    title: section.title,
-    data: section.data.filter(
-      item => selectedCategory === 'all' || item.category === selectedCategory || item.category === 'all'
+  const filteredSchedule = SCHEDULE_DATA.map(section => ({
+    ...section,
+    data: section.data.filter(item =>
+      selectedCategory === 'all' || item.category === selectedCategory
     ),
   })).filter(section => section.data.length > 0);
 
-  const handleRefresh = () => {
+  const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    // Simulate an API call that would update the schedule data
     setTimeout(() => {
       setRefreshing(false);
-    }, 1500);
+    }, 2000);
+  }, []);
+
+  const handleSwipeLeft = () => {
+    router.push('/map');
   };
 
-  return (
-    <View style={styles.container}>
-      <Header title="Schedule" showBackButton={false} />
+  const handleSwipeRight = () => {
+    router.push('/');
+  };
 
-      {/* Categories filter */}
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ongoing': return COLORS.success;
+      case 'completed': return COLORS.text_light;
+      default: return COLORS.primary;
+    }
+  };
+
+  const renderCategoryFilter = () => (
+    <Animated.View
+      entering={FadeInRight.delay(150).duration(400)}
+      style={styles.categoriesContainer}
+    >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.categoriesContainer}
-        contentContainerStyle={styles.categoriesContent}
+        contentContainerStyle={styles.categoriesScroll}
       >
-        {SCHEDULE_CATEGORIES.map((category) => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryButton,
-              selectedCategory === category.id && styles.selectedCategory
-            ]}
-            onPress={() => setSelectedCategory(category.id)}
-          >
-            <StyledText
-              style={[
-                styles.categoryText,
-                selectedCategory === category.id && styles.selectedCategoryText
-              ]}
+        {SCHEDULE_CATEGORIES.map((category, index) => {
+          const isSelected = selectedCategory === category.id;
+          return (
+            <Animated.View
+              key={category.id}
+              entering={SlideInLeft.delay(index * 60).duration(300)}
             >
-              {category.name}
-            </StyledText>
-          </TouchableOpacity>
-        ))}
+              <TouchableOpacity
+                style={[
+                  styles.categoryButton,
+                  isSelected && [styles.selectedCategory, { backgroundColor: category.color }]
+                ]}
+                onPress={() => setSelectedCategory(category.id)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={category.icon as any}
+                  size={18}
+                  color={isSelected ? COLORS.text_on_primary : COLORS.text_secondary}
+                />
+                <Text style={[
+                  styles.categoryText,
+                  { color: isSelected ? COLORS.text_on_primary : COLORS.text_secondary }
+                ]}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        })}
       </ScrollView>
+    </Animated.View>
+  );
 
-      {/* Schedule list */}
-      <SectionList
-        sections={filteredData}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        stickySectionHeadersEnabled={true}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[COLORS.primary]}
-          />
-        }
-        renderSectionHeader={({ section: { title } }) => (
-          <View style={styles.sectionHeader}>
-            <StyledText type="subheading" style={styles.sectionHeaderText}>
-              {title}
-            </StyledText>
+  const renderSectionHeader = ({ section }: any) => (
+    <Animated.View
+      entering={FadeInDown.duration(300)}
+      style={styles.sectionHeader}
+    >
+      <Text style={styles.sectionTitle}>{section.title}</Text>
+    </Animated.View>
+  );
+
+  const renderEventItem = ({ item, index }: any) => (
+    <Animated.View
+      entering={FadeInDown.delay(index * 80).duration(400)}
+      style={styles.eventWrapper}
+    >
+      <TouchableOpacity
+        style={styles.eventCard}
+        onPress={() => router.push(`/event-details/${item.id}`)}
+        activeOpacity={0.95}
+      >
+        <View style={styles.eventContent}>
+          <View style={styles.eventIconContainer}>
+            <Ionicons name={item.icon as any} size={20} color={COLORS.primary} />
           </View>
-        )}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.eventItem}
-            onPress={() => router.push(`/event-details/${item.id}`)}
-          >
-            <View style={styles.timeContainer}>
-              <StyledText type="bodyBold" style={styles.timeText}>
-                {item.time.split(' - ')[0]}
-              </StyledText>
-              <View style={styles.timeLine} />
+
+          <View style={styles.eventDetails}>
+            <View style={styles.eventHeader}>
+              <Text style={styles.eventTitle}>{item.title}</Text>
+              <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
             </View>
+            <Text style={styles.eventDescription}>{item.description}</Text>
 
-            <Card style={styles.eventCard}>
-              <View style={styles.eventContent}>
-                <View>
-                  <StyledText type="subheading" style={styles.eventTitle}>
-                    {item.title}
-                  </StyledText>
-                  <View style={styles.eventDetail}>
-                    <Ionicons name="time-outline" size={16} color={COLORS.text_secondary} />
-                    <StyledText type="caption" style={styles.eventDetailText}>
-                      {item.time}
-                    </StyledText>
-                  </View>
-                  <View style={styles.eventDetail}>
-                    <Ionicons name="location-outline" size={16} color={COLORS.text_secondary} />
-                    <StyledText type="caption" style={styles.eventDetailText}>
-                      {item.location}
-                    </StyledText>
-                  </View>
-                </View>
-                <View style={styles.eventAction}>
-                  <Ionicons name="chevron-forward" size={20} color={COLORS.text_secondary} />
-                </View>
+            <View style={styles.eventMeta}>
+              <View style={styles.metaItem}>
+                <Ionicons name="time-outline" size={16} color={COLORS.text_tertiary} />
+                <Text style={styles.metaText}>{item.time}</Text>
               </View>
-            </Card>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-outline" size={60} color={COLORS.text_tertiary} />
-            <StyledText type="subheading" style={styles.emptyText}>
-              No events found for this category
-            </StyledText>
+              <View style={styles.metaItem}>
+                <Ionicons name="location-outline" size={16} color={COLORS.text_tertiary} />
+                <Text style={styles.metaText}>{item.location}</Text>
+              </View>
+            </View>
           </View>
-        }
-        ListFooterComponent={
-          <View style={{ height: insets.bottom + SPACING.xl }} />
-        }
-      />
-    </View>
+
+          <View style={styles.eventActions}>
+            <TouchableOpacity
+              style={styles.favoriteButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                // Add to favorites logic
+              }}
+            >
+              <Ionicons name="heart-outline" size={18} color={COLORS.text_tertiary} />
+            </TouchableOpacity>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.text_tertiary} />
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
+  return (
+    <SwipeableScreen
+      onSwipeLeft={handleSwipeLeft}
+      onSwipeRight={handleSwipeRight}
+      backgroundColor={COLORS.background_secondary}
+    >
+      <View style={styles.container}>
+        <AnimatedHeader
+          title="Schedule"
+          subtitle="DECA Ontario 2025"
+          rightComponent={
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push('/awards')}
+            >
+              <Ionicons name="trophy-outline" size={22} color={COLORS.text_on_primary} />
+            </TouchableOpacity>
+          }
+        />
+
+        {renderCategoryFilter()}
+
+        <SectionList
+          sections={filteredSchedule}
+          keyExtractor={(item) => item.id}
+          renderItem={renderEventItem}
+          renderSectionHeader={renderSectionHeader}
+          contentContainerStyle={[styles.listContainer, { paddingBottom: LAYOUT.tab_bar_height + insets.bottom + 20 }]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          stickySectionHeadersEnabled={false}
+        />
+      </View>
+    </SwipeableScreen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.background_secondary,
   },
   categoriesContainer: {
-    maxHeight: 60,
-    backgroundColor: COLORS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    paddingVertical: SPACING.md,
+    marginBottom: SPACING.sm,
   },
-  categoriesContent: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+  categoriesScroll: {
+    paddingHorizontal: SPACING.screen_horizontal,
   },
   categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: 50,
+    paddingVertical: SPACING.sm,
     marginRight: SPACING.sm,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 1,
+    borderColor: COLORS.border_light,
+    ...SHADOWS.small,
   },
   selectedCategory: {
-    backgroundColor: COLORS.primary,
+    borderColor: 'transparent',
+    ...SHADOWS.medium,
   },
   categoryText: {
+    marginLeft: SPACING.xs,
     fontSize: FONT_SIZES.sm,
-    color: COLORS.text_secondary,
-  },
-  selectedCategoryText: {
-    color: '#FFFFFF',
     fontWeight: '600',
   },
-  listContent: {
-    paddingHorizontal: SPACING.lg,
+  listContainer: {
+    paddingTop: SPACING.sm,
   },
   sectionHeader: {
-    backgroundColor: COLORS.background,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginTop: SPACING.md,
-  },
-  sectionHeaderText: {
-    color: COLORS.primary,
-  },
-  eventItem: {
-    flexDirection: 'row',
+    marginHorizontal: SPACING.screen_horizontal,
+    marginTop: SPACING.lg,
     marginBottom: SPACING.md,
   },
-  timeContainer: {
-    width: 70,
-    alignItems: 'center',
-    marginRight: SPACING.sm,
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    textAlign: 'center',
   },
-  timeText: {
-    fontSize: FONT_SIZES.sm,
-    marginBottom: SPACING.xs,
-  },
-  timeLine: {
-    flex: 1,
-    width: 2,
-    backgroundColor: COLORS.border,
+  eventWrapper: {
+    marginHorizontal: SPACING.screen_horizontal,
+    marginBottom: SPACING.md,
   },
   eventCard: {
-    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+    ...SHADOWS.small,
+    borderWidth: 1,
+    borderColor: COLORS.border_light,
   },
   eventContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  eventTitle: {
-    marginBottom: SPACING.xs,
+  eventIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.stateActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
   },
-  eventDetail: {
+  eventDetails: {
+    flex: 1,
+  },
+  eventHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
-  eventDetailText: {
-    marginLeft: 6,
+  eventTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.text,
+    flex: 1,
   },
-  eventAction: {
-    justifyContent: 'center',
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: SPACING.xs,
   },
-  emptyContainer: {
+  eventDescription: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text_secondary,
+    marginBottom: SPACING.sm,
+    lineHeight: 20,
+  },
+  eventMeta: {
+    gap: SPACING.xs,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metaText: {
+    marginLeft: SPACING.xs,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text_tertiary,
+  },
+  eventActions: {
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginLeft: SPACING.sm,
+  },
+  favoriteButton: {
+    padding: SPACING.xs,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  actionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.xl,
-  },
-  emptyText: {
-    color: COLORS.text_tertiary,
-    marginTop: SPACING.md,
-    textAlign: 'center',
   },
 });

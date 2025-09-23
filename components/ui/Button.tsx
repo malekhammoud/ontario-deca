@@ -4,10 +4,9 @@ import {
   TouchableOpacityProps,
   StyleSheet,
   ActivityIndicator,
-  View
+  View,
+  Text
 } from 'react-native';
-import { StyledText } from './StyledText';
-import { COLORS, DESIGN_SYSTEM, SPACING } from '@/constants/colors';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -22,65 +21,76 @@ interface ButtonProps extends TouchableOpacityProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  label,
-  variant = 'primary',
-  size = 'medium',
-  loading = false,
-  leftIcon,
-  rightIcon,
-  fullWidth = false,
-  style,
-  disabled,
-  ...props
-}) => {
-  const getTextColor = () => {
-    if (disabled) return COLORS.text_tertiary;
+const Button: React.FC<ButtonProps> = (props) => {
+  const {
+    label,
+    variant = 'primary',
+    size = 'medium',
+    loading = false,
+    leftIcon,
+    rightIcon,
+    fullWidth = false,
+    style,
+    disabled,
+    ...touchableProps
+  } = props;
 
-    switch (variant) {
-      case 'primary':
-        return '#FFFFFF';
-      case 'secondary':
-      case 'outline':
-      case 'text':
-        return COLORS.primary;
-      default:
-        return COLORS.primary;
-    }
-  };
+  // Define styles based on variant
+  let buttonStyles = [styles.base, styles[size]];
+  let textColor = '#00539E';
+
+  if (variant === 'primary') {
+    buttonStyles.push(styles.primary);
+    textColor = '#FFFFFF';
+  } else if (variant === 'secondary') {
+    buttonStyles.push(styles.secondary);
+    textColor = '#00539E';
+  } else if (variant === 'outline') {
+    buttonStyles.push(styles.outline);
+    textColor = '#00539E';
+  } else if (variant === 'text') {
+    buttonStyles.push(styles.text);
+    textColor = '#00539E';
+  }
+
+  if (fullWidth) {
+    buttonStyles.push(styles.fullWidth);
+  }
+
+  if (disabled) {
+    buttonStyles.push(styles.disabled);
+    textColor = '#64748B';
+  }
+
+  if (style) {
+    buttonStyles.push(style);
+  }
 
   return (
     <TouchableOpacity
-      style={[
-        styles.base,
-        styles[variant],
-        styles[size],
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-        style
-      ]}
+      style={buttonStyles}
       disabled={disabled || loading}
-      {...props}
+      {...touchableProps}
     >
       <View style={styles.contentContainer}>
-        {leftIcon && !loading && <View style={styles.leftIconContainer}>{leftIcon}</View>}
+        {leftIcon && !loading && (
+          <View style={styles.leftIconContainer}>{leftIcon}</View>
+        )}
 
         {loading ? (
           <ActivityIndicator
             size="small"
-            color={variant === 'primary' ? '#FFFFFF' : COLORS.primary}
+            color={variant === 'primary' ? '#FFFFFF' : '#00539E'}
           />
         ) : (
-          <StyledText
-            type="button"
-            color={getTextColor()}
-            style={styles.label}
-          >
+          <Text style={[styles.label, { color: textColor }]}>
             {label}
-          </StyledText>
+          </Text>
         )}
 
-        {rightIcon && !loading && <View style={styles.rightIconContainer}>{rightIcon}</View>}
+        {rightIcon && !loading && (
+          <View style={styles.rightIconContainer}>{rightIcon}</View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -88,42 +98,54 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: DESIGN_SYSTEM.button.primary.borderRadius,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    minHeight: 48,
     justifyContent: 'center',
     alignItems: 'center',
   },
   primary: {
-    ...DESIGN_SYSTEM.button.primary,
+    backgroundColor: '#00539E',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   secondary: {
-    ...DESIGN_SYSTEM.button.secondary,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   outline: {
-    ...DESIGN_SYSTEM.button.outline,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   text: {
-    ...DESIGN_SYSTEM.button.text,
+    backgroundColor: 'transparent',
   },
   small: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     minHeight: 36,
   },
   medium: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     minHeight: 44,
   },
   large: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
     minHeight: 52,
   },
-  disabled: {
-    opacity: 0.6,
-  },
   fullWidth: {
-    width: '100%',
+    alignSelf: 'stretch',
+  },
+  disabled: {
+    opacity: 0.5,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -131,12 +153,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   leftIconContainer: {
-    marginRight: SPACING.sm,
+    marginRight: 8,
   },
   rightIconContainer: {
-    marginLeft: SPACING.sm,
+    marginLeft: 8,
   },
   label: {
     textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'System',
   },
 });
+
+export { Button };
+export default Button;

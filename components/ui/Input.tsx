@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Text
 } from 'react-native';
-import { COLORS, DESIGN_SYSTEM, FONT_SIZES, SPACING } from '@/constants/colors';
+import { COLORS } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { StyledText } from './StyledText';
 
@@ -111,10 +111,10 @@ export const Input: React.FC<InputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: SPACING.md,
+    marginBottom: 16,
   },
   label: {
-    marginBottom: SPACING.xs,
+    marginBottom: 8,
   },
   inputWrapper: {
     position: 'relative',
@@ -122,32 +122,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   input: {
-    ...DESIGN_SYSTEM.input.default,
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: COLORS.text,
+    minHeight: 44,
     flex: 1,
   },
   inputWithLeftIcon: {
-    paddingLeft: SPACING.xl + SPACING.sm,
+    paddingLeft: 48,
   },
   inputWithRightIcon: {
-    paddingRight: SPACING.xl + SPACING.sm,
+    paddingRight: 48,
   },
   inputFocused: {
-    ...DESIGN_SYSTEM.input.focus,
+    borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   inputError: {
-    ...DESIGN_SYSTEM.input.error,
+    borderColor: COLORS.error,
   },
   leftIconContainer: {
     position: 'absolute',
-    left: SPACING.md,
+    left: 16,
     zIndex: 1,
   },
   rightIconContainer: {
     position: 'absolute',
-    right: SPACING.md,
+    right: 16,
     zIndex: 1,
   },
   helperText: {
-    marginTop: SPACING.xs,
+    marginTop: 8,
   },
 });
+
+export default Input;

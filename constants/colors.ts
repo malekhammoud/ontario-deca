@@ -1,210 +1,260 @@
 /**
  * DECA Ontario App Theme Configuration
+ * Professional design system with modern animations
  */
 
 export const COLORS = {
-  // Primary DECA Colors
+  // Primary DECA Colors - more professional tones
   primary: '#00539E', // DECA Blue (PMS 287 C)
   primary_dark: '#003E77', // Darker shade of DECA Blue
-  primary_light: '#3379B5', // Lighter shade of DECA Blue
+  primary_light: '#2B6CB0', // More subtle lighter shade
+  primary_gradient: ['#00539E', '#2B6CB0'], // Professional gradient
 
-  // Neutrals & Backgrounds
+  // Professional accent colors
+  secondary: '#4F46E5', // Professional indigo
+  accent: '#059669', // Professional emerald
+  success: '#10B981', // Clean green
+  warning: '#F59E0B', // Professional amber
+  error: '#EF4444', // Clean red
+  info: '#3B82F6', // Professional blue
+
+  // Professional backgrounds
   background: '#FFFFFF',
+  background_secondary: '#F8FAFC',
+  background_dark: '#0F172A',
   card: '#FFFFFF',
-  surface: '#F8F9FA',
+  card_dark: '#1E293B',
+  surface: '#F1F5F9',
+  surface_elevated: '#FFFFFF',
 
-  // Text
-  text: '#202124',
-  text_secondary: '#5F6368',
-  text_tertiary: '#9AA0A6',
+  // Professional text hierarchy
+  text: '#0F172A',
+  text_secondary: '#475569',
+  text_tertiary: '#64748B',
+  text_light: '#94A3B8',
+  text_on_primary: '#FFFFFF',
+  text_muted: '#94A3B8',
 
-  // Utility
-  border: '#E1E3E5',
-  disabled: '#DADCE0',
-  error: '#D93025',
-  success: '#0F9D58',
-  warning: '#F4B400',
+  // Professional interactive states
+  border: '#E2E8F0',
+  border_light: '#F1F5F9',
+  border_focus: '#00539E',
+  disabled: '#CBD5E1',
+  placeholder: '#94A3B8',
 
-  // State colors
-  stateActive: '#E8F0FE',
-  statePressed: '#D2E3FC',
+  // Professional state colors
+  stateActive: '#EFF6FF',
+  statePressed: '#DBEAFE',
+  stateHover: '#F0F9FF',
 
-  // System
+  // Professional overlays
   transparent: 'transparent',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(15, 23, 42, 0.6)',
+  overlay_light: 'rgba(15, 23, 42, 0.3)',
+  backdrop: 'rgba(15, 23, 42, 0.8)',
+
+  // Professional tab bar
+  tab_background: '#FFFFFF',
+  tab_shadow: 'rgba(0, 83, 158, 0.08)',
 };
 
-export const FONTS = {
-  heading: {
-    fontFamily: 'System',
-    fontWeight: '700',
+export const GRADIENTS = {
+  primary: ['#00539E', '#2B6CB0'],
+  secondary: ['#4F46E5', '#7C3AED'],
+  success: ['#10B981', '#059669'],
+  professional: ['#F8FAFC', '#FFFFFF'],
+  subtle: ['rgba(0, 83, 158, 0.05)', 'rgba(0, 83, 158, 0.02)'],
+};
+
+export const SHADOWS = {
+  none: {
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
-  subheading: {
-    fontFamily: 'System',
-    fontWeight: '600',
+  small: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  body: {
-    fontFamily: 'System',
-    fontWeight: '400',
+  medium: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  button: {
-    fontFamily: 'System',
-    fontWeight: '600',
+  large: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  caption: {
-    fontFamily: 'System',
-    fontWeight: '400',
+  tab: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 8,
   },
 };
 
-export const FONT_SIZES = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 18,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 30,
-  '4xl': 36,
-};
-
+// Professional spacing scale
 export const SPACING = {
   xs: 4,
   sm: 8,
   md: 16,
   lg: 24,
   xl: 32,
-  '2xl': 48,
-  '3xl': 64,
+  xxl: 48,
+  xxxl: 64,
+  // Mobile-specific spacing
+  screen_horizontal: 20,
+  screen_vertical: 16,
+  card_margin: 12,
+  section_gap: 24,
 };
 
-export const SHADOWS = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 1.0,
-    elevation: 1,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.23,
-    shadowRadius: 2.62,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.30,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-};
-
+// Mobile-optimized border radius
 export const BORDER_RADIUS = {
   xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  xxl: 20,
   full: 9999,
 };
 
-export const NAV_THEME = {
-  dark: false,
-  colors: {
-    primary: COLORS.primary,
-    background: COLORS.background,
-    card: COLORS.card,
-    text: COLORS.text,
-    border: COLORS.border,
-    notification: COLORS.primary,
+// Mobile-optimized font sizes
+export const FONT_SIZES = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 20,
+  xxl: 24,
+  xxxl: 28,
+  huge: 32,
+  display: 36,
+};
+
+export const FONT_WEIGHTS = {
+  light: '300' as const,
+  regular: '400' as const,
+  medium: '500' as const,
+  semibold: '600' as const,
+  bold: '700' as const,
+  heavy: '800' as const,
+};
+
+// Professional animation timings
+export const ANIMATION = {
+  duration: {
+    fast: 150,
+    normal: 250,
+    slow: 350,
+  },
+  easing: {
+    ease: 'ease-out',
+    spring: { damping: 20, stiffness: 300 },
   },
 };
 
-// Design system for consistent component styling
+export const FONTS = {
+  heading: {
+    fontFamily: 'System',
+    fontWeight: FONT_WEIGHTS.bold,
+  },
+  subheading: {
+    fontFamily: 'System',
+    fontWeight: FONT_WEIGHTS.semibold,
+  },
+  body: {
+    fontFamily: 'System',
+    fontWeight: FONT_WEIGHTS.regular,
+  },
+  button: {
+    fontFamily: 'System',
+    fontWeight: FONT_WEIGHTS.semibold,
+  },
+  caption: {
+    fontFamily: 'System',
+    fontWeight: FONT_WEIGHTS.medium,
+  },
+};
+
+// Mobile device dimensions and safe areas
+export const LAYOUT = {
+  // Standard mobile breakpoints
+  mobile: {
+    small: 320,  // iPhone SE
+    medium: 375, // iPhone 12/13/14
+    large: 414,  // iPhone 12/13/14 Plus
+    xl: 428,     // iPhone 14 Pro Max
+  },
+  // Component dimensions
+  tab_bar_height: 84,
+  header_height: 120,
+  card_min_height: 80,
+  button_height: 48,
+  input_height: 44,
+  // Safe area considerations
+  safe_area_bottom: 34, // iPhone with home indicator
+  safe_area_top: 44,    // iPhone with notch
+};
+
+// Professional design system
 export const DESIGN_SYSTEM = {
-  // Button styles
   button: {
     primary: {
       backgroundColor: COLORS.primary,
-      color: '#FFFFFF',
+      color: COLORS.text_on_primary,
       borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-      ...SHADOWS.md,
+      paddingVertical: 12,
+      paddingHorizontal: SPACING.lg,
+      minHeight: LAYOUT.button_height,
+      ...SHADOWS.small,
     },
     secondary: {
       backgroundColor: COLORS.background,
       color: COLORS.primary,
-      borderWidth: 2,
-      borderColor: COLORS.primary,
-      borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-    },
-    outline: {
-      backgroundColor: 'transparent',
-      color: COLORS.primary,
       borderWidth: 1,
       borderColor: COLORS.border,
       borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
+      paddingVertical: 12,
+      paddingHorizontal: SPACING.lg,
+      minHeight: LAYOUT.button_height,
     },
-    text: {
+    ghost: {
       backgroundColor: 'transparent',
       color: COLORS.primary,
-      padding: SPACING.md,
+      paddingVertical: 12,
+      paddingHorizontal: SPACING.lg,
+      minHeight: LAYOUT.button_height,
     },
   },
-
-  // Card styles
   card: {
     default: {
       backgroundColor: COLORS.card,
-      borderRadius: BORDER_RADIUS.md,
+      borderRadius: BORDER_RADIUS.lg,
       padding: SPACING.md,
-      ...SHADOWS.sm,
-      borderWidth: 1,
-      borderColor: COLORS.border,
+      marginHorizontal: SPACING.screen_horizontal,
+      marginVertical: SPACING.card_margin,
+      ...SHADOWS.small,
     },
     elevated: {
       backgroundColor: COLORS.card,
-      borderRadius: BORDER_RADIUS.md,
+      borderRadius: BORDER_RADIUS.lg,
       padding: SPACING.md,
-      ...SHADOWS.md,
-    },
-    flat: {
-      backgroundColor: COLORS.surface,
-      borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-    },
-  },
-
-  // Form input styles
-  input: {
-    default: {
-      backgroundColor: COLORS.surface,
-      borderWidth: 1,
-      borderColor: COLORS.border,
-      borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-      fontSize: FONT_SIZES.md,
-      color: COLORS.text,
-    },
-    focus: {
-      borderColor: COLORS.primary,
-    },
-    error: {
-      borderColor: COLORS.error,
+      marginHorizontal: SPACING.screen_horizontal,
+      marginVertical: SPACING.card_margin,
+      ...SHADOWS.medium,
     },
   },
 };
