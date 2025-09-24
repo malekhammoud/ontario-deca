@@ -4,11 +4,6 @@
   "devCommand": "npm run web",
   "installCommand": "npm install",
   "framework": null,
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node@3.0.7"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
