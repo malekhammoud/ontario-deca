@@ -42,6 +42,9 @@ export default function ProfileScreen() {
   const [website, setWebsite] = React.useState(networking.website || '')
   const [selectedEvents, setSelectedEvents] = React.useState<string[]>(eventSelections)
 
+  // Check if user data came from database (not editable)
+  const isFromDatabase = metadata.isFromDatabase || false
+
   // Toggle event selection
   const toggleEvent = (eventId: string) => {
     if (selectedEvents.includes(eventId)) {
@@ -51,7 +54,7 @@ export default function ProfileScreen() {
     }
   }
 
-  // Save profile changes
+  // Save profile changes - only allow editing of networking info and events
   const saveProfile = async () => {
     if (!user) return
 
@@ -60,9 +63,7 @@ export default function ProfileScreen() {
       await user.update({
         unsafeMetadata: {
           ...metadata,
-          firstName,
-          lastName,
-          school,
+          // Keep database-sourced info unchanged
           networking: {
             linkedin,
             emailOrPhone,
@@ -84,10 +85,7 @@ export default function ProfileScreen() {
 
   // Cancel editing
   const cancelEdit = () => {
-    // Reset form to original values
-    setFirstName(metadata.firstName || '')
-    setLastName(metadata.lastName || '')
-    setSchool(metadata.school || '')
+    // Reset form to original values (only networking info)
     setLinkedin(networking.linkedin || '')
     setEmailOrPhone(networking.emailOrPhone || '')
     setWebsite(networking.website || '')
@@ -131,54 +129,38 @@ export default function ProfileScreen() {
         <Card style={styles.section}>
           <StyledText type="heading2" style={styles.sectionTitle}>
             Personal Information
+            {isFromDatabase && (
+              <StyledText style={styles.databaseBadge}> (From Database)</StyledText>
+            )}
           </StyledText>
           
-          {isEditing ? (
-            <>
-              <Input
-                label="First Name"
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="Enter your first name"
-                leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
-              />
-              <Input
-                label="Last Name"
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Enter your last name"
-                leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
-              />
-              <Input
-                label="School"
-                value={school}
-                onChangeText={setSchool}
-                placeholder="Enter your school name"
-                leftIcon={<Ionicons name="school-outline" size={20} color={COLORS.text_secondary} />}
-              />
-            </>
-          ) : (
-            <>
-              <View style={styles.infoRow}>
-                <Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />
-                <View style={styles.infoContent}>
-                  <StyledText style={styles.infoLabel}>Name</StyledText>
-                  <StyledText style={styles.infoValue}>
-                    {firstName && lastName ? `${firstName} ${lastName}` : 'Not provided'}
-                  </StyledText>
-                </View>
-              </View>
-              
-              <View style={styles.infoRow}>
-                <Ionicons name="school-outline" size={20} color={COLORS.text_secondary} />
-                <View style={styles.infoContent}>
-                  <StyledText style={styles.infoLabel}>School</StyledText>
-                  <StyledText style={styles.infoValue}>
-                    {school || 'Not provided'}
-                  </StyledText>
-                </View>
-              </View>
-            </>
+          <View style={styles.infoRow}>
+            <Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />
+            <View style={styles.infoContent}>
+              <StyledText style={styles.infoLabel}>Name</StyledText>
+              <StyledText style={styles.infoValue}>
+                {metadata.firstName && metadata.lastName ? `${metadata.firstName} ${metadata.lastName}` : 'Not provided'}
+              </StyledText>
+            </View>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="school-outline" size={20} color={COLORS.text_secondary} />
+            <View style={styles.infoContent}>
+              <StyledText style={styles.infoLabel}>School</StyledText>
+              <StyledText style={styles.infoValue}>
+                {metadata.school || 'Not provided'}
+              </StyledText>
+            </View>
+          </View>
+
+          {isFromDatabase && (
+            <View style={styles.databaseNotice}>
+              <Ionicons name="information-circle-outline" size={16} color={COLORS.primary} />
+              <StyledText style={styles.databaseNoticeText}>
+                Your name and school information is sourced from our event database and cannot be edited here.
+              </StyledText>
+            </View>
           )}
         </Card>
 
@@ -468,5 +450,23 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: COLORS.text_secondary,
     textDecorationLine: 'underline',
+  },
+  databaseBadge: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontStyle: 'italic',
+  },
+  databaseNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary + '10',
+    borderRadius: 8,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  databaseNoticeText: {
+    color: COLORS.primary,
+    marginLeft: SPACING.sm,
+    fontSize: 14,
   },
 })

@@ -3,18 +3,22 @@
 
 const DEVELOPMENT_ALLOWED_EMAILS = [
   // Add some test emails for development - you can add your actual email here for testing
-  'test@example.com',
-  'admin@deca.org',
-  'student@school.edu',
-  // Add your actual email here for testing
+  { email: 'test@example.com', name: 'Test User', school: 'Test High School' },
+  { email: 'admin@deca.org', name: 'Admin User', school: 'DECA Ontario' },
+  { email: 'student@school.edu', name: 'John Doe', school: 'Sample Secondary School' },
+  // Add your actual email here for testing with mock data
 ];
 
-export const validateEmailLocally = (email: string): boolean => {
+export const validateEmailLocally = (email: string): { exists: boolean; studentData: any } => {
   const normalizedEmail = email.toLowerCase().trim();
-  return DEVELOPMENT_ALLOWED_EMAILS.includes(normalizedEmail);
+  const student = DEVELOPMENT_ALLOWED_EMAILS.find(s => s.email === normalizedEmail);
+  return {
+    exists: !!student,
+    studentData: student ? { name: student.name, school: student.school } : null
+  };
 };
 
-export const validateEmailInDatabase = async (email: string): Promise<boolean> => {
+export const validateEmailInDatabase = async (email: string): Promise<{ exists: boolean; studentData: any }> => {
   const maxRetries = 2;
   let lastError: Error | null = null;
 
@@ -36,7 +40,20 @@ export const validateEmailInDatabase = async (email: string): Promise<boolean> =
           if (response.ok) {
             const data = await response.json();
             console.log('Production API validation result:', data);
-            return data.exists;
+
+            // Enhanced debugging
+            if (data.debug) {
+              console.log('API Debug Info:', {
+                rowCount: data.debug.rowCount,
+                firstRow: data.debug.firstRow,
+                hasStudentData: !!data.studentData
+              });
+            }
+
+            return {
+              exists: data.exists,
+              studentData: data.studentData
+            };
           }
         } catch (apiError) {
           console.log('Production API failed in development, using local validation:', apiError);
@@ -65,7 +82,10 @@ export const validateEmailInDatabase = async (email: string): Promise<boolean> =
           if (response.ok) {
             const data = await response.json();
             console.log(`Email validation successful via ${endpoint}:`, data);
-            return data.exists;
+            return {
+              exists: data.exists,
+              studentData: data.studentData
+            };
           }
         } catch (endpointError) {
           console.log(`Endpoint ${endpoint} failed:`, endpointError);

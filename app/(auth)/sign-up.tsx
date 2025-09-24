@@ -35,9 +35,7 @@ export default function SignUpScreen() {
   const [emailValidating, setEmailValidating] = React.useState(false)
   const [errors, setErrors] = React.useState<{[key: string]: string}>({})
   const [step, setStep] = React.useState(1) // 1: Email/Password, 2: User Info, 3: Verification
-  const [firstName, setFirstName] = React.useState('')
-  const [lastName, setLastName] = React.useState('')
-  const [school, setSchool] = React.useState('')
+  const [studentData, setStudentData] = React.useState<{name: string, school: string} | null>(null)
   const [linkedin, setLinkedin] = React.useState('')
   const [emailOrPhone, setEmailOrPhone] = React.useState('')
   const [website, setWebsite] = React.useState('')
@@ -100,7 +98,11 @@ export default function SignUpScreen() {
   // Simplified function to validate email against database
   const validateEmail = async (email: string): Promise<boolean> => {
     try {
-      return await validateEmailInDatabase(email);
+      const result = await validateEmailInDatabase(email);
+      if (result.exists && result.studentData) {
+        setStudentData(result.studentData);
+      }
+      return result.exists;
     } catch (error) {
       console.error('Email validation error:', error);
       throw error;
@@ -156,33 +158,18 @@ export default function SignUpScreen() {
     }
   }
 
-  // Handle user info submission (step 2)
+  // Handle user info submission (step 2) - now much simpler
   const onUserInfoSubmit = async () => {
-    // Basic validation
-    const newErrors: {[key: string]: string} = {}
-
-    if (!firstName.trim()) {
-      newErrors.firstName = 'First name is required'
-    }
-
-    if (!lastName.trim()) {
-      newErrors.lastName = 'Last name is required'
-    }
-
-    if (!school.trim()) {
-      newErrors.school = 'School name is required'
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
     setLoading(true)
     setErrors({})
 
     try {
-      // Create the account with all the collected information
+      // Parse the name from database (handle various formats)
+      const nameParts = studentData?.name?.split(' ') || []
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || ''
+
+      // Create the account with database info + optional networking details
       await signUp.create({
         emailAddress,
         password,
@@ -191,7 +178,8 @@ export default function SignUpScreen() {
         unsafeMetadata: {
           firstName,
           lastName,
-          school,
+          school: studentData?.school || '',
+          isFromDatabase: true, // Flag to indicate this came from database
           networking: {
             linkedin,
             emailOrPhone,
@@ -345,42 +333,43 @@ export default function SignUpScreen() {
           </View>
 
           <View style={styles.form}>
-            <Input
-              label="First Name"
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text)
-                clearError('firstName')
-              }}
-              placeholder="Enter your first name"
-              error={errors.firstName}
-              autoFocus
-              leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
-            />
+            <StyledText style={styles.sectionTitle}>
+              Your Information (From Database)
+            </StyledText>
 
-            <Input
-              label="Last Name"
-              value={lastName}
-              onChangeText={(text) => {
-                setLastName(text)
-                clearError('lastName')
-              }}
-              placeholder="Enter your last name"
-              error={errors.lastName}
-              leftIcon={<Ionicons name="person-outline" size={20} color={COLORS.text_secondary} />}
-            />
+            {/* Display Name from Database */}
+            <View style={styles.infoDisplayCard}>
+              <View style={styles.infoRow}>
+                <Ionicons name="person-outline" size={20} color={COLORS.primary} />
+                <View style={styles.infoContent}>
+                  <StyledText style={styles.infoLabel}>Name</StyledText>
+                  <StyledText style={styles.infoValue}>
+                    {studentData?.name || 'Loading...'}
+                  </StyledText>
+                </View>
+              </View>
+            </View>
 
-            <Input
-              label="School"
-              value={school}
-              onChangeText={(text) => {
-                setSchool(text)
-                clearError('school')
-              }}
-              placeholder="Enter your school name"
-              error={errors.school}
-              leftIcon={<Ionicons name="school-outline" size={20} color={COLORS.text_secondary} />}
-            />
+            {/* Display School from Database */}
+            <View style={styles.infoDisplayCard}>
+              <View style={styles.infoRow}>
+                <Ionicons name="school-outline" size={20} color={COLORS.primary} />
+                <View style={styles.infoContent}>
+                  <StyledText style={styles.infoLabel}>School</StyledText>
+                  <StyledText style={styles.infoValue}>
+                    {studentData?.school || 'Loading...'}
+                  </StyledText>
+                </View>
+              </View>
+            </View>
+
+            {/* Database Info Notice */}
+            <View style={styles.databaseNotice}>
+              <Ionicons name="information-circle-outline" size={16} color={COLORS.primary} />
+              <StyledText style={styles.databaseNoticeText}>
+                This information is automatically retrieved from our event database
+              </StyledText>
+            </View>
 
             <StyledText style={styles.sectionTitle}>
               Networking Information (Optional)
@@ -467,7 +456,7 @@ export default function SignUpScreen() {
             <Button
               label={loading ? "Creating Account..." : "Create Account & Send Verification"}
               onPress={onUserInfoSubmit}
-              disabled={loading || !firstName.trim() || !lastName.trim() || !school.trim()}
+              disabled={loading || !studentData}
               loading={loading}
               style={styles.submitButton}
             />
@@ -676,5 +665,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.text_secondary,
     marginBottom: SPACING.md,
+  },
+  infoDisplayCard: {
+    backgroundColor: COLORS.background + '80',
+    borderRadius: 12,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '20',
+    elevation: 1,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoContent: {
+    marginLeft: SPACING.md,
+    flex: 1,
+  },
+  infoLabel: {
+    color: COLORS.text_secondary,
+    fontSize: 14,
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  infoValue: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  databaseNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary + '10',
+    padding: SPACING.md,
+    borderRadius: 8,
+    marginBottom: SPACING.lg,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  databaseNoticeText: {
+    color: COLORS.primary,
+    marginLeft: SPACING.sm,
+    flex: 1,
+    fontSize: 14,
+    fontStyle: 'italic',
   },
 })

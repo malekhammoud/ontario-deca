@@ -77,30 +77,53 @@ module.exports = async (req, res) => {
 
     console.log('Attempting database connection...');
 
-    // Check if email exists in the students table
+    // Check if email exists in the students table and get associated data
     client = await pool.connect();
     console.log('Database connected successfully');
 
     const startTime = Date.now();
     const result = await client.query(
-      'SELECT email FROM students WHERE LOWER(email) = $1 LIMIT 1',
+      'SELECT email, name, school FROM students WHERE LOWER(email) = $1 LIMIT 1',
       [normalizedEmail]
     );
     const queryTime = Date.now() - startTime;
 
     console.log(`Query completed in ${queryTime}ms`);
     console.log(`Query result: ${result.rows.length} rows found`);
+    console.log('Raw query result:', JSON.stringify(result.rows, null, 2));
 
     const emailExists = result.rows.length > 0;
+    const studentData = emailExists ? result.rows[0] : null;
 
     console.log(`Email validation result for ${normalizedEmail}: ${emailExists ? 'EXISTS' : 'NOT FOUND'}`);
+    if (studentData) {
+      console.log(`Student data found:`, {
+        name: studentData.name,
+        school: studentData.school,
+        email: studentData.email
+      });
+    } else {
+      console.log('No student data found - result.rows was empty or null');
+    }
 
-    return res.status(200).json({
+    const responseData = {
       exists: emailExists,
       email: normalizedEmail,
+      studentData: studentData ? {
+        name: studentData.name || 'Name not found',
+        school: studentData.school || 'School not found'
+      } : null,
       timestamp: new Date().toISOString(),
-      queryTimeMs: queryTime
-    });
+      queryTimeMs: queryTime,
+      debug: {
+        rowCount: result.rows.length,
+        firstRow: result.rows[0] || null
+      }
+    };
+
+    console.log('Final response data:', JSON.stringify(responseData, null, 2));
+
+    return res.status(200).json(responseData);
 
   } catch (error) {
     console.error('Database error details:', {
