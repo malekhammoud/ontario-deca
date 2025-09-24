@@ -1,15 +1,23 @@
 // Vercel serverless function for email validation
 const { Pool } = require('pg');
 
-// Create a connection pool with better configuration
+// Optimized connection pool configuration for maximum concurrent users with PgBouncer
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, // This uses Neon's PgBouncer pooler
   ssl: {
     rejectUnauthorized: false
   },
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close clients after 30 seconds of inactivity
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+  // Optimized settings for serverless + PgBouncer
+  max: 1, // Keep minimal connections per serverless instance (PgBouncer handles the real pooling)
+  min: 0, // No minimum connections in serverless
+  idleTimeoutMillis: 1000, // Close idle connections quickly in serverless (1 second)
+  connectionTimeoutMillis: 5000, // 5 second timeout for getting a connection
+  acquireTimeoutMillis: 5000, // 5 second timeout for acquiring from pool
+  createTimeoutMillis: 5000, // 5 second timeout for creating new connection
+  destroyTimeoutMillis: 5000, // 5 second timeout for destroying connection
+  createRetryIntervalMillis: 200, // Retry connection creation every 200ms
+  // Optimized for short-lived serverless functions
+  allowExitOnIdle: true, // Allow process to exit when no active connections
 });
 
 module.exports = async (req, res) => {
