@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Screen } from '@/components/ui/Screen'
 import { COLORS, SPACING } from '@/constants/colors'
+import { validateEmailInDatabase } from '@/utils/emailValidation'
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
@@ -31,6 +32,7 @@ export default function SignUpScreen() {
   const [code, setCode] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [verificationLoading, setVerificationLoading] = React.useState(false)
+  const [emailValidating, setEmailValidating] = React.useState(false)
   const [errors, setErrors] = React.useState<{[key: string]: string}>({})
   const [step, setStep] = React.useState(1) // 1: Email/Password, 2: User Info, 3: Verification
   const [firstName, setFirstName] = React.useState('')
@@ -95,6 +97,16 @@ export default function SignUpScreen() {
     return newErrors
   }
 
+  // Simplified function to validate email against database
+  const validateEmail = async (email: string): Promise<boolean> => {
+    try {
+      return await validateEmailInDatabase(email);
+    } catch (error) {
+      console.error('Email validation error:', error);
+      throw error;
+    }
+  };
+
   // Handle submission of sign-up form (step 1 - email/password)
   const onSignUpPress = async () => {
     if (!isLoaded) return
@@ -119,9 +131,29 @@ export default function SignUpScreen() {
       return
     }
 
+    // Validate email exists in database
+    setEmailValidating(true)
     setErrors({})
-    // Move to step 2 (user info collection)
-    setStep(2)
+
+    try {
+      const emailExists = await validateEmail(emailAddress)
+
+      if (!emailExists) {
+        setErrors({
+          email: 'This email is not registered for the event. Please contact support if you believe this is an error.'
+        })
+        return
+      }
+
+      // Email is valid, proceed to step 2
+      setStep(2)
+    } catch (error) {
+      setErrors({
+        general: error instanceof Error ? error.message : 'Unable to validate email. Please try again.'
+      })
+    } finally {
+      setEmailValidating(false)
+    }
   }
 
   // Handle user info submission (step 2)
@@ -502,9 +534,10 @@ export default function SignUpScreen() {
           )}
 
           <Button
-            label="Next: Complete Profile"
+            label={emailValidating ? "Validating..." : "Next: Complete Profile"}
             onPress={onSignUpPress}
             disabled={!emailAddress.trim() || !password.trim()}
+            loading={emailValidating}
             style={styles.submitButton}
           />
 
