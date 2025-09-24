@@ -37,7 +37,13 @@ export const AnimatedTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const animatedValue = useSharedValue(0);
-  const tabWidth = width / state.routes.length;
+
+  // Better mobile-responsive calculations
+  const containerPadding = 16;
+  const tabContainerPadding = 8;
+  const availableWidth = width - (containerPadding * 2) - (tabContainerPadding * 2);
+  const tabWidth = availableWidth / state.routes.length;
+  const indicatorWidth = Math.max(60, tabWidth - 20); // Minimum width with responsive sizing
 
   useEffect(() => {
     animatedValue.value = withSpring(state.index, {
@@ -47,10 +53,13 @@ export const AnimatedTabBar: React.FC<BottomTabBarProps> = ({
   }, [state.index]);
 
   const indicatorStyle = useAnimatedStyle(() => {
+    const startPosition = tabContainerPadding + (tabWidth - indicatorWidth) / 2;
+    const endPosition = tabContainerPadding + ((state.routes.length - 1) * tabWidth) + (tabWidth - indicatorWidth) / 2;
+
     const translateX = interpolate(
       animatedValue.value,
       [0, state.routes.length - 1],
-      [16, width - tabWidth - 16],
+      [startPosition, endPosition],
       Extrapolation.CLAMP
     );
 
@@ -65,7 +74,6 @@ export const AnimatedTabBar: React.FC<BottomTabBarProps> = ({
       schedule: 'calendar',
       map: 'map',
       resources: 'document-text',
-      explore: 'compass',
       more: 'ellipsis-horizontal',
     };
     return iconMap[routeName] || 'circle';
@@ -94,7 +102,11 @@ export const AnimatedTabBar: React.FC<BottomTabBarProps> = ({
         <View style={styles.background} />
 
         {/* Animated Indicator - More Professional */}
-        <Animated.View style={[styles.indicator, indicatorStyle]}>
+        <Animated.View style={[
+          styles.indicator,
+          indicatorStyle,
+          { width: indicatorWidth } // Use calculated indicator width
+        ]}>
           <View style={styles.indicatorBackground} />
         </Animated.View>
 
@@ -131,17 +143,6 @@ export const AnimatedTabBar: React.FC<BottomTabBarProps> = ({
             );
           })}
         </View>
-
-        {/* Professional Profile Button */}
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate('profile')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.profileButtonBackground}>
-            <Ionicons name="person" size={20} color={COLORS.primary} />
-          </View>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -175,7 +176,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 6,
     height: 52,
-    width: (width / 5) - 24,
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -218,23 +218,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 2,
-  },
-  profileButton: {
-    position: 'absolute',
-    top: -8,
-    right: 16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    ...SHADOWS.medium,
-  },
-  profileButtonBackground: {
-    flex: 1,
-    borderRadius: 22,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.border_light,
   },
 });

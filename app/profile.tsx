@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native'
-import { useUser } from '@clerk/clerk-expo'
+import { useUser, useAuth } from '@clerk/clerk-expo'
+import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { StyledText } from '@/components/ui/StyledText'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Screen } from '@/components/ui/Screen'
 import { Card } from '@/components/ui/Card'
+import { Header } from '@/components/ui/Header'
 import { COLORS, SPACING } from '@/constants/colors'
 
 const EVENT_NAMES = {
@@ -25,6 +27,8 @@ const EVENT_NAMES = {
 
 export default function ProfileScreen() {
   const { user, isLoaded } = useUser()
+  const { signOut } = useAuth()
+  const router = useRouter()
   const [isEditing, setIsEditing] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
   
@@ -93,6 +97,17 @@ export default function ProfileScreen() {
     setIsEditing(false)
   }
 
+  // Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.replace('/sign-in') // Redirect to sign-in screen
+    } catch (error) {
+      console.error('Error signing out:', error)
+      Alert.alert('Error', 'Failed to sign out. Please try again.')
+    }
+  }
+
   if (!isLoaded) {
     return (
       <Screen>
@@ -105,26 +120,16 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <StyledText type="heading1" style={styles.title}>
-            My Profile
-          </StyledText>
-          <TouchableOpacity 
-            onPress={() => setIsEditing(!isEditing)}
-            style={styles.editButton}
-          >
-            <Ionicons 
-              name={isEditing ? "close" : "pencil"} 
-              size={20} 
-              color={COLORS.primary} 
-            />
-            <StyledText style={styles.editButtonText}>
-              {isEditing ? 'Cancel' : 'Edit'}
-            </StyledText>
-          </TouchableOpacity>
-        </View>
+      <Header
+        title="My Profile"
+        onBackPress={() => router.back()}
+        rightAction={{
+          icon: isEditing ? "close" : "pencil",
+          onPress: () => setIsEditing(!isEditing),
+        }}
+      />
 
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Personal Information */}
         <Card style={styles.section}>
           <StyledText type="heading2" style={styles.sectionTitle}>
@@ -317,6 +322,16 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Sign Out Button - Always visible */}
+        <View style={styles.signOutContainer}>
+          <Button
+            label="Sign Out"
+            onPress={handleSignOut}
+            style={styles.signOutButton}
+            textStyle={styles.signOutButtonText}
+          />
+        </View>
       </ScrollView>
     </Screen>
   )
@@ -338,8 +353,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   title: {
     color: COLORS.primary,
+  },
+  backButton: {
+    position: 'absolute',
+    left: SPACING.lg,
+    padding: SPACING.sm,
+    borderRadius: 50,
+    backgroundColor: COLORS.primary + '10',
   },
   editButton: {
     flexDirection: 'row',
@@ -468,5 +494,22 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     marginLeft: SPACING.sm,
     fontSize: 14,
+  },
+  signOutContainer: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xl,
+    alignItems: 'center',
+  },
+  signOutButton: {
+    backgroundColor: COLORS.danger,
+    borderRadius: 8,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    width: '100%',
+  },
+  signOutButtonText: {
+    color: COLORS.white,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 })
