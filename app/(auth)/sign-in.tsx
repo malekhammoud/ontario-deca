@@ -134,7 +134,7 @@ export default function SignInScreen() {
             Welcome Back
           </StyledText>
           <StyledText style={styles.subtitle}>
-            Sign in to your DECA Ontario account
+            Sign in to your Ontario DECA account
           </StyledText>
         </View>
 
@@ -184,7 +184,10 @@ export default function SignInScreen() {
             style={styles.submitButton}
           />
 
-          <TouchableOpacity style={styles.forgotPasswordButton}>
+          <TouchableOpacity 
+            style={styles.forgotPasswordButton}
+            onPress={() => router.push('/(auth)/forgot-password' as any)}
+          >
             <StyledText style={styles.forgotPasswordText}>
               Forgot your password?
             </StyledText>

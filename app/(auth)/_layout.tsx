@@ -32,6 +32,25 @@ export default function AuthRoutesLayout() {
           title: 'Sign Up',
         }}
       />
+      <Stack.Screen
+        name="forgot-password"
+        options={{
+          title: 'Forgot Password',
+        }}
+      />
+      <Stack.Screen
+        name="reset-password"
+        options={{
+          title: 'Reset Password',
+        }}
+      />
+      <Stack.Screen
+        name="password-reset"
+        options={{
+          title: 'Password Reset',
+          headerShown: false,
+        }}
+      />
     </Stack>
   )
 }

@@ -281,7 +281,7 @@ export default function ContactScreen() {
         </View>
         
         {/* Message Form */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <StyledText type="heading3" style={styles.sectionTitle}>
             Send Message
           </StyledText>
@@ -348,7 +348,7 @@ export default function ContactScreen() {
               </View>
             )}
           </Card>
-        </View>
+        </View> */}
         
         {/* Additional Info */}
         <View style={styles.section}>

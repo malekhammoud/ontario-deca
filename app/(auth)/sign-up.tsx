@@ -476,7 +476,7 @@ export default function SignUpScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <StyledText type="heading1" style={styles.title}>
-            Join DECA Ontario
+            Join Ontario DECA
           </StyledText>
           <StyledText style={styles.subtitle}>
             Create your account to access the Provincials Event App

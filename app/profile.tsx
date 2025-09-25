@@ -123,13 +123,59 @@ export default function ProfileScreen() {
       <Header
         title="My Profile"
         onBackPress={() => router.back()}
-        rightAction={{
-          icon: isEditing ? "close" : "pencil",
-          onPress: () => setIsEditing(!isEditing),
-        }}
       />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Edit Profile Prompt - More Prominent */}
+        {!isEditing && (
+          <Card style={styles.editPromptCard}>
+            <TouchableOpacity 
+              style={styles.editPromptButton}
+              onPress={() => setIsEditing(true)}
+            >
+              <View style={styles.editPromptContent}>
+                <View style={styles.editPromptIconContainer}>
+                  <Ionicons name="pencil" size={24} color={COLORS.primary} />
+                </View>
+                <View style={styles.editPromptTextContainer}>
+                  <StyledText style={styles.editPromptTitle}>
+                    Edit Your Profile
+                  </StyledText>
+                  <StyledText style={styles.editPromptSubtitle}>
+                    Update networking info & event preferences
+                  </StyledText>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color={COLORS.primary} />
+              </View>
+            </TouchableOpacity>
+          </Card>
+        )}
+
+        {/* Edit Mode Header */}
+        {isEditing && (
+          <Card style={styles.editModeCard}>
+            <View style={styles.editModeHeader}>
+              <View style={styles.editModeIconContainer}>
+                <Ionicons name="create-outline" size={24} color={COLORS.primary} />
+              </View>
+              <View style={styles.editModeTextContainer}>
+                <StyledText style={styles.editModeTitle}>
+                  Edit Mode
+                </StyledText>
+                <StyledText style={styles.editModeSubtitle}>
+                  Make your changes below
+                </StyledText>
+              </View>
+              <TouchableOpacity 
+                onPress={cancelEdit}
+                style={styles.closeEditButton}
+              >
+                <Ionicons name="close" size={24} color={COLORS.text_secondary} />
+              </TouchableOpacity>
+            </View>
+          </Card>
+        )}
+
         {/* Personal Information */}
         <Card style={styles.section}>
           <StyledText type="heading2" style={styles.sectionTitle}>
@@ -170,10 +216,18 @@ export default function ProfileScreen() {
         </Card>
 
         {/* Networking Information */}
-        <Card style={styles.section}>
-          <StyledText type="heading2" style={styles.sectionTitle}>
-            Networking Information
-          </StyledText>
+        <Card style={[styles.section, isEditing && styles.editableSection]}>
+          <View style={styles.sectionHeader}>
+            <StyledText type="heading2" style={styles.sectionTitle}>
+              Networking Information
+            </StyledText>
+            {isEditing && (
+              <View style={styles.editableIndicator}>
+                <Ionicons name="create" size={16} color={COLORS.primary} />
+                <StyledText style={styles.editableText}>Editable</StyledText>
+              </View>
+            )}
+          </View>
           
           {isEditing ? (
             <>
@@ -235,19 +289,33 @@ export default function ProfileScreen() {
               )}
               
               {!linkedin && !emailOrPhone && !website && (
-                <StyledText style={styles.emptyState}>
-                  No networking information provided. Tap edit to add your contact details.
-                </StyledText>
+                <View style={styles.emptyStateContainer}>
+                  <Ionicons name="add-circle-outline" size={32} color={COLORS.text_secondary} />
+                  <StyledText style={styles.emptyState}>
+                    No networking information provided.
+                  </StyledText>
+                  <StyledText style={styles.emptyStateHint}>
+                    Tap "Edit Your Profile" above to add your contact details.
+                  </StyledText>
+                </View>
               )}
             </>
           )}
         </Card>
 
         {/* Event Preferences */}
-        <Card style={styles.section}>
-          <StyledText type="heading2" style={styles.sectionTitle}>
-            Event Networking Preferences
-          </StyledText>
+        <Card style={[styles.section, isEditing && styles.editableSection]}>
+          <View style={styles.sectionHeader}>
+            <StyledText type="heading2" style={styles.sectionTitle}>
+              Event Networking Preferences
+            </StyledText>
+            {isEditing && (
+              <View style={styles.editableIndicator}>
+                <Ionicons name="create" size={16} color={COLORS.primary} />
+                <StyledText style={styles.editableText}>Editable</StyledText>
+              </View>
+            )}
+          </View>
           
           {isEditing ? (
             <>
@@ -300,14 +368,21 @@ export default function ProfileScreen() {
                   ))}
                 </View>
               ) : (
-                <StyledText style={styles.emptyState}>
-                  No event preferences selected. Tap edit to choose your networking interests.
-                </StyledText>
+                <View style={styles.emptyStateContainer}>
+                  <Ionicons name="calendar-outline" size={32} color={COLORS.text_secondary} />
+                  <StyledText style={styles.emptyState}>
+                    No event preferences selected.
+                  </StyledText>
+                  <StyledText style={styles.emptyStateHint}>
+                    Tap "Edit Your Profile" above to choose your networking interests.
+                  </StyledText>
+                </View>
               )}
             </>
           )}
         </Card>
 
+        {/* Save/Cancel Buttons - Enhanced */}
         {isEditing && (
           <View style={styles.buttonContainer}>
             <Button
@@ -318,7 +393,8 @@ export default function ProfileScreen() {
               style={styles.saveButton}
             />
             <TouchableOpacity onPress={cancelEdit} style={styles.cancelButton}>
-              <StyledText style={styles.cancelButtonText}>Cancel</StyledText>
+              <Ionicons name="close-circle-outline" size={20} color={COLORS.text_secondary} />
+              <StyledText style={styles.cancelButtonText}>Cancel Changes</StyledText>
             </TouchableOpacity>
           </View>
         )}
@@ -347,46 +423,173 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
+  
+  // Enhanced Edit Prompt Styles
+  editPromptCard: {
+    marginBottom: SPACING.lg,
+    backgroundColor: COLORS.primary + '08',
+    borderColor: COLORS.primary + '30',
+    borderWidth: 2,
+    borderRadius: 16,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  titleContainer: {
+  editPromptButton: {
+    padding: SPACING.lg,
+  },
+  editPromptContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editPromptIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.primary + '15',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  editPromptTextContainer: {
     flex: 1,
-    alignItems: 'center',
   },
-  title: {
+  editPromptTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     color: COLORS.primary,
+    marginBottom: 2,
   },
-  backButton: {
-    position: 'absolute',
-    left: SPACING.lg,
-    padding: SPACING.sm,
-    borderRadius: 50,
-    backgroundColor: COLORS.primary + '10',
+  editPromptSubtitle: {
+    fontSize: 14,
+    color: COLORS.primary + 'CC',
   },
-  editButton: {
+
+  // Edit Mode Header Styles
+  editModeCard: {
+    marginBottom: SPACING.lg,
+    backgroundColor: COLORS.success + '08',
+    borderColor: COLORS.success + '30',
+    borderWidth: 1,
+    borderRadius: 12,
+  },
+  editModeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: 8,
-    backgroundColor: COLORS.primary + '10',
+    padding: SPACING.md,
   },
-  editButtonText: {
-    color: COLORS.primary,
-    marginLeft: SPACING.xs,
-    fontWeight: '500',
+  editModeIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.success + '15',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
   },
+  editModeTextContainer: {
+    flex: 1,
+  },
+  editModeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.success,
+    marginBottom: 2,
+  },
+  editModeSubtitle: {
+    fontSize: 13,
+    color: COLORS.success + 'CC',
+  },
+  closeEditButton: {
+    padding: SPACING.xs,
+  },
+
+  // Section Styles
   section: {
     marginBottom: SPACING.lg,
   },
-  sectionTitle: {
-    color: COLORS.text_primary,
+  editableSection: {
+    borderColor: COLORS.primary + '20',
+    borderWidth: 1,
+    backgroundColor: COLORS.primary + '02',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: SPACING.md,
   },
+  sectionTitle: {
+    color: COLORS.text_primary,
+    flex: 1,
+  },
+  editableIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary + '10',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: 12,
+  },
+  editableText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginLeft: SPACING.xs,
+  },
+
+  // Enhanced Empty State
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+  },
+  emptyState: {
+    textAlign: 'center',
+    color: COLORS.text_secondary,
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  emptyStateHint: {
+    textAlign: 'center',
+    color: COLORS.text_secondary,
+    fontSize: 14,
+    fontStyle: 'italic',
+  },
+
+  // Enhanced Button Styles
+  buttonContainer: {
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  saveButton: {
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.success,
+    shadowColor: COLORS.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 8,
+    backgroundColor: COLORS.background_secondary,
+  },
+  cancelButtonText: {
+    color: COLORS.text_secondary,
+    fontWeight: '500',
+    marginLeft: SPACING.xs,
+  },
+
+  // Existing styles (keeping all the original ones)
   infoRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -405,12 +608,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text_primary,
     fontWeight: '500',
-  },
-  emptyState: {
-    textAlign: 'center',
-    color: COLORS.text_secondary,
-    fontStyle: 'italic',
-    paddingVertical: SPACING.lg,
   },
   subtitle: {
     textAlign: 'center',
@@ -461,21 +658,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 14,
     fontWeight: '500',
-  },
-  buttonContainer: {
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  saveButton: {
-    marginBottom: SPACING.md,
-  },
-  cancelButton: {
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-  },
-  cancelButtonText: {
-    color: COLORS.text_secondary,
-    textDecorationLine: 'underline',
   },
   databaseBadge: {
     fontSize: 14,

@@ -253,22 +253,22 @@ export default function MoreScreen() {
             <StyledText style={styles.actionText}>Contact Support</StyledText>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.signOutButton}
             onPress={handleSignOut}
           >
             <Ionicons name="log-out" size={20} color={COLORS.error} />
             <StyledText style={[styles.actionText, { color: COLORS.error }]}>Sign Out</StyledText>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* App Info */}
         <View style={styles.appInfo}>
           <StyledText type="caption" style={styles.appVersion}>
-            DECA Ontario Provincials App v1.0.0
+            Ontario DECA Provincials App v1.0.0
           </StyledText>
           <StyledText type="caption" style={styles.copyright}>
-            © 2025 DECA Ontario. All Rights Reserved.
+            © 2025 Ontario DECA. All Rights Reserved.
           </StyledText>
         </View>
 
