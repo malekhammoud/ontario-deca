@@ -1,5 +1,6 @@
 // Simple email validation utility that works with your existing infrastructure
 // This creates a local list for development and uses the API for production
+const API_URL = process.env.ONTARIO_DECA_API_URL
 
 const DEVELOPMENT_ALLOWED_EMAILS = [
   // Add some test emails for development - you can add your actual email here for testing
@@ -30,7 +31,7 @@ export const validateEmailInDatabase = async (email: string): Promise<{ exists: 
       if (__DEV__) {
         try {
           // Try the production API first
-          const response = await fetch('https://ontario-deca.vercel.app/api/validate-email', {
+          const response = await fetch(`${API_URL}/api/validate-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email.toLowerCase().trim() }),
@@ -66,7 +67,7 @@ export const validateEmailInDatabase = async (email: string): Promise<{ exists: 
 
       // Production: try multiple endpoints
       const endpoints = [
-        'https://ontario-deca.vercel.app/api/validate-email',
+        `${API_URL}/api/validate-email`,
         '/api/validate-email'
       ];
 
