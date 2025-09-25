@@ -9,9 +9,11 @@ import {
   Dimensions,
   Platform
 } from 'react-native';
+import { router } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import QRCode from 'react-native-qrcode-svg';
 
 import { Header } from '@/components/ui/Header';
 import { StyledText } from '@/components/ui/StyledText';
@@ -19,16 +21,12 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { COLORS, SPACING, SHADOWS } from '@/constants/colors';
 
-// Conditionally import QR code library for native platforms
-let QRCode = null;
-let Clipboard = null;
-if (Platform.OS !== 'web') {
-  try {
-    QRCode = require('react-native-qrcode-svg').default;
-    Clipboard = require('expo-clipboard');
-  } catch (error) {
-    console.log('QR Code or Clipboard not available');
-  }
+// Import clipboard for all platforms
+let Clipboard: any = null;
+try {
+  Clipboard = require('expo-clipboard');
+} catch (error) {
+  console.log('Clipboard not available');
 }
 
 const { width } = Dimensions.get('window');
@@ -50,14 +48,8 @@ export default function NetworkingScreen() {
     }
   });
 
-  // Generate QR code data - in a real app, this would be a unique identifier or encrypted data
-  const qrData = JSON.stringify({
-    id: user?.id || 'user-id',
-    name: profileData.name,
-    email: profileData.email,
-    organization: profileData.organization,
-    timestamp: new Date().toISOString()
-  });
+  // Generate QR code data with just the user's email
+  const qrData = profileData.email;
 
   // Mock connections for demo purposes
   const [connections, setConnections] = useState([
@@ -104,44 +96,12 @@ export default function NetworkingScreen() {
 
   // Handle scanning QR code
   const handleScanQR = () => {
-    // In a real app, this would open the camera for QR scanning
-    // For this demo, we'll simulate adding a new connection
-    Alert.alert(
-      'Scan QR Code',
-      'This would normally open your camera to scan someone\'s QR code. For this demo, we\'ll simulate adding a new connection.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Simulate Scan',
-          onPress: () => {
-            // Add a mock new connection
-            const newConnection = {
-              id: `${connections.length + 1}`,
-              name: 'New Connection',
-              role: 'Student',
-              organization: 'Sample School',
-              email: 'new.connection@example.com',
-              connected: 'Just now',
-              interests: ['Leadership', 'International Business'],
-            };
-
-            setConnections([newConnection, ...connections]);
-
-            Alert.alert(
-              'Connection Added',
-              `You've successfully connected with ${newConnection.name} from ${newConnection.organization}.`
-            );
-          },
-        },
-      ]
-    );
+    // Navigate to the QR code scanner modal
+    router.push('/modal');
   };
 
   // Copy email to clipboard
-  const copyEmailToClipboard = async (email) => {
+  const copyEmailToClipboard = async (email: string) => {
     if (Platform.OS === 'web') {
       // Web fallback
       if (navigator.clipboard) {
@@ -156,28 +116,17 @@ export default function NetworkingScreen() {
     }
   };
 
-  // Web-compatible QR code component
+  // QR code component - displays user's email
   const QRCodeComponent = () => {
-    if (Platform.OS === 'web' || !QRCode) {
-      return (
-        <View style={styles.webQRFallback}>
-          <Ionicons name="qr-code" size={QR_SIZE * 0.6} color={COLORS.primary} />
-          <StyledText style={styles.webQRText}>
-            QR Code generation is not available in the web version.
-            Use the share button below to share your profile.
-          </StyledText>
-        </View>
-      );
-    }
-
     return (
       <QRCode
         value={qrData}
-        size={QR_SIZE}
-        color={COLORS.primary}
+        size={200}
+        color="black"
         backgroundColor="#FFFFFF"
-        logoSize={QR_SIZE * 0.2}
-        logoBackgroundColor="#FFFFFF"
+        logo="https://cdn.prod.website-files.com/635c470cc81318fc3e9c1e0e/639a07cada7a2d68f4e9ef31_DECA%20Diamond%20Blue.png"
+        logoSize={50}
+        logoBackgroundColor="transparent"
       />
     );
   };
@@ -495,7 +444,7 @@ const styles = StyleSheet.create({
   qrCard: {
     alignItems: 'center',
     padding: SPACING.lg,
-    ...SHADOWS.md,
+    ...SHADOWS.medium,
   },
   qrTitle: {
     marginBottom: SPACING.xs,
@@ -509,7 +458,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    ...SHADOWS.sm,
+    ...SHADOWS.small,
   },
   qrActions: {
     flexDirection: 'row',
