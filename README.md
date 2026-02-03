@@ -1,50 +1,57 @@
-# Welcome to your Expo app 👋
+# Ontario DECA Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A feature-rich mobile application built with **Expo (React Native)** designed to streamline the experience for participants and organizers of the **Ontario DECA** event.
 
-## Get started
+> **Note:** This project was developed as a comprehensive solution for the DECA conference but was cancelled prior to launch. It remains here as a showcase of mobile development expertise, full-stack integration, and UI/UX design for large-scale events.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🚀 Features
 
-2. Start the app
+* **User Authentication:** Secure login and registration system for students and chapter advisors.
+* **Event Calendars:** Real-time scheduling for workshops, competitions, and ceremonies.
+* **Interactive Maps:** Custom maps of the event venue to help participants navigate efficiently.
+* **Competition Resources:** Quick access to performance indicators, roleplay tips, and event-specific guidelines.
+* **Push Notifications:** Instant alerts regarding schedule changes or important announcements.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠 Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **Frontend:** React Native with Expo
+* **State Management:** React Hooks / Context API
+* **Navigation:** React Navigation
+* **Maps:** React Native Maps
+* **Styling:** NativeWind (Tailwind CSS for React Native)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 📦 Installation
 
-When you're ready, run:
+To run this project locally, ensure you have the [Expo Go](https://expo.dev/expo-go) app installed on your device or an emulator set up.
 
-```bash
-npm run reset-project
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/malekhammoud/ontario-deca.git](https://github.com/malekhammoud/ontario-deca.git)
+    ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2.  **Navigate to the project directory:**
+    ```bash
+    cd ontario-deca
+    ```
 
-## Learn more
+3.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-To learn more about developing your project with Expo, look at the following resources:
+4.  **Start the development server:**
+    ```bash
+    npx expo start
+    ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 📐 Architecture
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The app follows a modular architecture, separating concerns between UI components, business logic, and API interactions. It was designed with scalability in mind to handle the thousands of students attending the Ontario DECA Provincials.
